@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.crv.dao.DemandDao">
+    
+	<sql id="demandColumns">
+		a.id AS "id",
+		a.de_name AS "deName",
+		a.de_type AS "deType",
+		a.de_detail AS "deDetail",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="demandJoins">
+	</sql>
+    
+	<select id="get" resultType="Demand">
+		SELECT 
+			<include refid="demandColumns"/>
+		FROM demand a
+		<include refid="demandJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Demand">
+		SELECT 
+			<include refid="demandColumns"/>
+		FROM demand a
+		<include refid="demandJoins"/>
+		WHERE 
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		
+		<if test="deName != null and deName != ''">
+			AND a.de_name LIKE 
+				<if test="dbName == 'oracle'">'%'||#{deName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{deName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{deName},'%')</if>
+		 </if>
+	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Demand">
+		SELECT 
+			<include refid="demandColumns"/>
+		FROM demand a
+		<include refid="demandJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO demand(
+			id,
+			de_name,
+			de_type,
+			de_detail,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{deName},
+			#{deType},
+			#{deDetail},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE demand SET 	
+			de_name = #{deName},
+			de_type = #{deType},
+			de_detail = #{deDetail},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE demand SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

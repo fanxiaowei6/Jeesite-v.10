@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.crv.dao.ComputerDao">
+    
+	<sql id="computerColumns">
+		a.id AS "id",
+		a.comp_id AS "compId",
+		a.comp_name AS "compName",
+		a.comp_type AS "compType",
+		a.comp_describe AS "compDescribe",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="computerJoins">
+	</sql>
+    
+	<select id="get" resultType="Computer">
+		SELECT 
+			<include refid="computerColumns"/>
+		FROM computer a
+		<include refid="computerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Computer">
+		SELECT 
+			<include refid="computerColumns"/>
+		FROM computer a
+		<include refid="computerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<if test="compId !=null and compId != ''">
+			and a.comp_id = #{compId}
+		</if>
+	
+		<if test="compName != null and compName != ''">
+			and a.comp_name like 
+			<if test="dbName == 'mysql'">concat('%',#{compName},'%')</if>
+		
+		</if>
+		
+		
+		
+		<!--  数据范围过滤 
+		${sqlMap.dsf} -->
+		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Computer">
+		SELECT 
+			<include refid="computerColumns"/>
+		FROM computer a
+		<include refid="computerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO computer(
+			id,
+			comp_id,
+			comp_name,
+			comp_type,
+			comp_describe,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{compId},
+			#{compName},
+			#{compType},
+			#{compDescribe},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE computer SET 	
+			comp_id = #{compId},
+			comp_name = #{compName},
+			comp_type = #{compType},
+			comp_describe = #{compDescribe},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE computer SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
